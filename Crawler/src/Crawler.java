@@ -1,49 +1,46 @@
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Queue;
-import java.util.LinkedList;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import javax.print.Doc;
+
 
 
 public class Crawler implements Runnable{
 
-    private final int maxsize;
-    private ArrayList<String> mainvisited;
-    private ArrayList<String> suppvisited=new ArrayList<String>();
-    private Thread thread;
-    private Queue<String> queue;
+    private int maxsize;
     private final int ID;
-    private final Object o;
+    private shared_memory memory;
 
 
-    public Crawler(int id,ArrayList<String>s,ArrayList<String>v,int max_s,Object to_sync)
+    public Crawler(int id,shared_memory s_m,int max_s)
     {
         ID=id;
-        o=to_sync;
-        mainvisited=v;
         maxsize=max_s;
-        queue=new LinkedList<>();
-        for(int e=0;e<s.size();e++)
-            queue.offer(s.get(e));
-        thread=new Thread(this);
+        memory=s_m;
     }
 
-    public void start_thread()
-    {
-     thread.start();
-    }
 
     @Override
     public void run() {
-        while(!queue.isEmpty() && suppvisited.size() != maxsize)
-        {
-            String url = queue.poll();
-            crawl(url);
+        start_crawl();
+    }
+
+    private void start_crawl()
+    {
+        while (true) {
+            String url = memory.queue_poll();
+            if (url == null) {
+                if (memory.visited_size() >= maxsize) {
+                    return;
+                }
+            } else {
+                crawl(url);
+                if (memory.visited_size() >= maxsize) {
+                    return;
+                }
+            }
         }
     }
 
@@ -53,8 +50,11 @@ public class Crawler implements Runnable{
         if(doc != null) {
             for (Element link : doc.select("a[href]")) {
                 String nextlink = link.absUrl("href");
-                if (!queue.contains(nextlink) && !suppvisited.contains(nextlink))
-                    queue.offer(nextlink);
+                if(!memory.map_contains(nextlink))
+                {
+                    memory.map_add(nextlink);
+                    memory.queue_offer(nextlink);
+                }
             }
         }
     }
@@ -66,12 +66,11 @@ public class Crawler implements Runnable{
             Document doc = con.get();
             if(con.response().statusCode() == 200)
             {
-                if(add_url(url))
-                {
-//                System.out.println("thread "+ ID + ": added Link: " + url);
-//                System.out.println(doc.title());
+                memory.visited_add(url);
+                memory.map_add(url);
+                System.out.println("thread "+ ID + ": added Link: " + url);
+                System.out.println(doc.title());
                 return doc;
-                }
             }
             return null;
         }
@@ -81,22 +80,6 @@ public class Crawler implements Runnable{
         }
     }
 
-    private boolean add_url(String url)
-    {
-        synchronized (o)
-        {
-            if(!mainvisited.contains(url)) {
-                mainvisited.add(url);
-                suppvisited.add(url);
-                return true;
-            }
-            return false;
-        }
-    }
 
-    public Thread getThread()
-    {
-        return thread;
-    }
 
 }
