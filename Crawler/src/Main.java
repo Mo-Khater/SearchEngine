@@ -1,4 +1,5 @@
 import java.net.URI;
+import java.net.URL;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.io.BufferedReader;
@@ -18,9 +19,13 @@ public class Main {
             String line;
             while ((line = reader.readLine()) != null) {
                 // Normalize URLs before adding them to Start_urls
-                URI orgUrl = new URI(line);
-                URI normUrl = new URI(orgUrl.getScheme(), orgUrl.getAuthority(), orgUrl.getPath(), null, null);
-                Start_urls.add(normUrl.toString());
+                URI orgURI = new URI(line);
+                URL check = orgURI.toURL(); // THIS LINE WILL THROW EXCEPTION IF URL IS INVALID
+
+                URI normUrl = new URI(orgURI.getScheme(), orgURI.getAuthority(), orgURI.getPath(), null, null);
+                if (!normUrl.toString().isEmpty() && !Start_urls.contains(normUrl.toString())) {
+                    Start_urls.add(normUrl.toString());
+                }
             }
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();

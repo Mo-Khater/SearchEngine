@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.net.URL;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -54,28 +54,29 @@ public class Crawler implements Runnable{
             for (Element link : doc.select("a[href]")) {
                 String nextlink = link.absUrl("href");
 
-                URI originalUrl = null;
-                URI normalizedUrl = null;
+                URI originalURI = null;
+                URI normalizedURI = null;
 
                 // now check if there exists a malformed URL
                 try {;
-                    originalUrl = new URI(nextlink);
-                    System.out.println("original URL (next link): " + originalUrl);
+                    originalURI = new URI(nextlink);
+                    URL  check = originalURI.toURL(); // THIS LINE WILL THROW EXCEPTION IF URL IS INVALID
+                    System.out.println("original URI (next link): " + originalURI);
 
-                    normalizedUrl = new URI(originalUrl.getScheme(), originalUrl.getAuthority(), originalUrl.getPath(), null, null);
-                    System.out.println("Normalized Url :" + normalizedUrl);
-                } catch (URISyntaxException e) {
+                    normalizedURI = new URI(originalURI.getScheme(), originalURI.getAuthority(), originalURI.getPath(), null, null);
+                    System.out.println("Normalized URI :" + normalizedURI);
+                } catch (URISyntaxException | MalformedURLException e) {
                     // uncomment these lines to see the exception happen
 //                    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 //                    throw new RuntimeException(e);
                 }
 
 
-                if(normalizedUrl != null && !memory.map_contains(normalizedUrl.toString()))
+                if(normalizedURI != null && !memory.map_contains(normalizedURI.toString()))
                 {
-                    memory.map_add(normalizedUrl.toString());
-                    memory.queue_offer(normalizedUrl.toString());
-                    System.out.println("ADDED TO QUEUE: "+ normalizedUrl);
+                    memory.map_add(normalizedURI.toString());
+                    memory.queue_offer(normalizedURI.toString());
+                    System.out.println("ADDED TO QUEUE: "+ normalizedURI);
                 }
             }
         }
