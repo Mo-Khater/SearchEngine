@@ -1,4 +1,7 @@
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -50,10 +53,29 @@ public class Crawler implements Runnable{
         if(doc != null) {
             for (Element link : doc.select("a[href]")) {
                 String nextlink = link.absUrl("href");
-                if(!memory.map_contains(nextlink))
+
+                URI originalUrl = null;
+                URI normalizedUrl = null;
+
+                // now check if there exists a malformed URL
+                try {;
+                    originalUrl = new URI(nextlink);
+                    System.out.println("original URL (next link): " + originalUrl);
+
+                    normalizedUrl = new URI(originalUrl.getScheme(), originalUrl.getAuthority(), originalUrl.getPath(), null, null);
+                    System.out.println("Normalized Url :" + normalizedUrl);
+                } catch (URISyntaxException e) {
+                    // uncomment these lines to see the exception happen
+//                    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+//                    throw new RuntimeException(e);
+                }
+
+
+                if(normalizedUrl != null && !memory.map_contains(normalizedUrl.toString()))
                 {
-                    memory.map_add(nextlink);
-                    memory.queue_offer(nextlink);
+                    memory.map_add(normalizedUrl.toString());
+                    memory.queue_offer(normalizedUrl.toString());
+                    System.out.println("ADDED TO QUEUE: "+ normalizedUrl);
                 }
             }
         }

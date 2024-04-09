@@ -19,6 +19,7 @@ public class Crawler_System {
 
     public void Start()
     {
+        // Start_urls are already normalized
         for(String s:Start_urls)
         {
             memory.queue_offer(s);

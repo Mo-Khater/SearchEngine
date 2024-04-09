@@ -1,3 +1,5 @@
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,9 +17,12 @@ public class Main {
         try (BufferedReader reader = Files.newBufferedReader(Paths.get("Start_Urls.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                Start_urls.add(line);
+                // Normalize URLs before adding them to Start_urls
+                URI orgUrl = new URI(line);
+                URI normUrl = new URI(orgUrl.getScheme(), orgUrl.getAuthority(), orgUrl.getPath(), null, null);
+                Start_urls.add(normUrl.toString());
             }
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
 
@@ -25,8 +30,8 @@ public class Main {
         Crawler_System c=new Crawler_System(number_threads,memory,Start_urls);
         c.Start();
 
-        System.out.println(memory.visited_size());
-        System.out.println(c.get_time());
+        System.out.println("# Visited URLs = "+ memory.visited_size());
+        System.out.println("Time taken = " + c.get_time());
 
     }
 }
