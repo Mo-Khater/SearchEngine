@@ -1,0 +1,65 @@
+
+
+.urlpage{
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    background-color: #181818 ;
+}
+
+
+.urlpage .searchbar{
+    background-color: aliceblue;
+    border-radius: 20px;
+    width: 25%;
+    height: 25px;
+    padding-left: 30px;
+    margin: 40px 100px;
+    background-image: url("D:\gm3a\LocalSearchEngine\FrontEnd\images\search.png");
+    background-size: 18px;
+    background-repeat: no-repeat;
+    background-position-x: 7px;
+    background-position-y: 50%;
+    &:focus{
+        outline: none;
+    }
+}
+
+.urlpage .urls{
+    display: flex;
+    flex-direction: column;
+    margin: 20px 100px;
+}
+
+.urlpage .urls .element{
+    width: 40%;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.urlpage .urls .element .name{
+    display: block;
+    color: #1a1a1a;
+    text-decoration: none;
+    font-size: 24px;
+}
+
+.urlpage .urls .element .url{
+    color: blue;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.urlpage .urls .element .describtion{
+    margin-top: 10px;
+    color: #1a1a1a;
+    margin-left: 5px;
+}
+
+.urlpage .urls .element .describtion span{
+    display: block;
+    color: rgba(8, 8, 8, 0.636);
+}
