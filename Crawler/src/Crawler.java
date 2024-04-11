@@ -8,7 +8,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.github.itechbear.robotstxt.RobotsMatcher;
 
+import javax.swing.*;
 
 public class Crawler implements Runnable{
 
@@ -39,7 +41,10 @@ public class Crawler implements Runnable{
                     return;
                 }
             } else {
-                crawl(url);
+                if (allowedRobot(url))
+                {
+                    crawl(url);
+                }
                 if (memory.visited_size() >= maxsize) {
                     return;
                 }
@@ -61,10 +66,10 @@ public class Crawler implements Runnable{
                 try {;
                     originalURI = new URI(nextlink);
                     URL  check = originalURI.toURL(); // THIS LINE WILL THROW EXCEPTION IF URL IS INVALID
-                    System.out.println("original URI (next link): " + originalURI);
+//                    System.out.println("original URI (next link): " + originalURI);
 
                     normalizedURI = new URI(originalURI.getScheme(), originalURI.getAuthority(), originalURI.getPath(), null, null);
-                    System.out.println("Normalized URI :" + normalizedURI);
+//                    System.out.println("Normalized URI :" + normalizedURI);
                 } catch (URISyntaxException | MalformedURLException e) {
                     // uncomment these lines to see the exception happen
 //                    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
@@ -76,7 +81,7 @@ public class Crawler implements Runnable{
                 {
                     memory.map_add(normalizedURI.toString());
                     memory.queue_offer(normalizedURI.toString());
-                    System.out.println("ADDED TO QUEUE: "+ normalizedURI);
+//                    System.out.println("ADDED TO QUEUE: "+ normalizedURI);
                 }
             }
         }
@@ -93,6 +98,7 @@ public class Crawler implements Runnable{
                 memory.map_add(url);
                 System.out.println("thread "+ ID + ": added Link: " + url);
                 System.out.println(doc.title());
+                System.out.println(memory.visited_size());
                 return doc;
             }
             return null;
@@ -103,6 +109,43 @@ public class Crawler implements Runnable{
         }
     }
 
+    public static String getRobotUrl(String site)
+    {
+        URL a;
+        try {
+            // get the address of robots.txt
+            a = new URI(site).toURL();
+            String s = a.getProtocol() + "://" + a.getHost().toString()+"/robots.txt";
+            return s;
+        } catch (MalformedURLException | URISyntaxException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 
+    public static String fetchRobotsTxtOfSite(String str)
+    {
+        String roboturl = getRobotUrl(str);
+        String data = "";
+        try {
+            URL a = new URI(roboturl).toURL();
+            Connection con = Jsoup.connect(a.toString());
+            Document doc = con.get();
+            if (con.response().statusCode() == 200)
+            {
+                data = doc.wholeText();
+            }
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
 
+    public static boolean allowedRobot(String website) {
+        RobotsMatcher matcher = new RobotsMatcher();
+        String robotstxt = fetchRobotsTxtOfSite(website);
+        boolean a= matcher.OneAgentAllowedByRobots(robotstxt, "*", website);
+//        System.out.println(a);
+        return a;
+    }
 }

@@ -35,6 +35,14 @@ public class Main {
         Crawler_System c=new Crawler_System(number_threads,memory,Start_urls);
         c.Start();
 
+
+//        String s = memory.queue_poll();
+//        while (s != null) {
+//            System.out.println(s);
+//            s = memory.queue_poll();
+//        }
+
+
         System.out.println("# Visited URLs = "+ memory.visited_size());
         System.out.println("Time taken = " + c.get_time());
 
