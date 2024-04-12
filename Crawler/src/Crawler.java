@@ -41,9 +41,14 @@ public class Crawler implements Runnable{
                     return;
                 }
             } else {
-                if (allowedRobot(url))
+                int status=allowedRobot(url);
+                if (status==1)
                 {
                     crawl(url);
+                }
+                else if(status==0)
+                {
+                    memory.queue_offer(url);
                 }
                 if (memory.visited_size() >= maxsize) {
                     return;
@@ -135,17 +140,19 @@ public class Crawler implements Runnable{
                 data = doc.wholeText();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("cant connect: " + roboturl);
+            data="cant connect";
         }
         return data;
     }
 
-    public static boolean allowedRobot(String website) {
+    public static int allowedRobot(String website) {
         RobotsMatcher matcher = new RobotsMatcher();
         String robotstxt = fetchRobotsTxtOfSite(website);
+        if(robotstxt.equals("cant connect")) return 0;
         boolean a = matcher.OneAgentAllowedByRobots(robotstxt, "*", website);
 //        System.out.println(a);
 //        System.out.println(robotstxt);
-        return a;
+        return (a)? 1:-1;
     }
 }
