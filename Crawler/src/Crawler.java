@@ -101,10 +101,11 @@ public class Crawler implements Runnable{
                 System.out.println(memory.visited_size());
                 return doc;
             }
-            return null;
+            throw new IOException();
         }
         catch (IOException e)
         {
+            memory.queue_offer(url);
             return null;
         }
     }
@@ -115,7 +116,7 @@ public class Crawler implements Runnable{
         try {
             // get the address of robots.txt
             a = new URI(site).toURL();
-            String s = a.getProtocol() + "://" + a.getHost().toString()+"/robots.txt";
+            String s = a.getProtocol() + "://" + a.getHost().toString() + "/robots.txt";
             return s;
         } catch (MalformedURLException | URISyntaxException e) {
             e.printStackTrace();
@@ -128,14 +129,12 @@ public class Crawler implements Runnable{
         String roboturl = getRobotUrl(str);
         String data = "";
         try {
-            URL a = new URI(roboturl).toURL();
-            Connection con = Jsoup.connect(a.toString());
+            Connection con = Jsoup.connect(roboturl);
             Document doc = con.get();
-            if (con.response().statusCode() == 200)
-            {
+            if (con.response().statusCode() == 200) {
                 data = doc.wholeText();
             }
-        } catch (URISyntaxException | IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return data;
@@ -144,8 +143,9 @@ public class Crawler implements Runnable{
     public static boolean allowedRobot(String website) {
         RobotsMatcher matcher = new RobotsMatcher();
         String robotstxt = fetchRobotsTxtOfSite(website);
-        boolean a= matcher.OneAgentAllowedByRobots(robotstxt, "*", website);
+        boolean a = matcher.OneAgentAllowedByRobots(robotstxt, "*", website);
 //        System.out.println(a);
+//        System.out.println(robotstxt);
         return a;
     }
 }
