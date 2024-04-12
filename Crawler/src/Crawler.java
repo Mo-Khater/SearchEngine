@@ -41,10 +41,10 @@ public class Crawler implements Runnable{
                     return;
                 }
             } else {
-                if (allowedRobot(url))
-                {
+//                if (allowedRobot(url))
+//                {
                     crawl(url);
-                }
+//                }
                 if (memory.visited_size() >= maxsize) {
                     return;
                 }
