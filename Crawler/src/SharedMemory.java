@@ -1,18 +1,19 @@
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.io.FileWriter;
+import java.io.IOException;
 
 
 
 
 
-
-public class shared_memory {
+public class SharedMemory {
     private ConcurrentLinkedQueue<String> queue;
     private ConcurrentHashMap<String, Boolean> map;
     private ConcurrentHashMap<String, Boolean> visited;
 
 
-    shared_memory()
+    SharedMemory()
     {
         queue=new ConcurrentLinkedQueue<>();
         map = new ConcurrentHashMap<>();
@@ -53,6 +54,29 @@ public class shared_memory {
     public long visited_size()
     {
         return visited.size();
+    }
+
+    public void saveState(String filePath){
+        try {
+            FileWriter fileWriter = new FileWriter(filePath);
+            fileWriter.close();
+            System.out.println("File cleared successfully.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        try {
+            FileWriter fileWriter = new FileWriter(filePath);
+            while (!queue.isEmpty()) {
+                String element = queue.poll();
+                fileWriter.write(element + "\n");
+            }
+            fileWriter.close();
+            System.out.println("Queue contents saved to file successfully.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
 }

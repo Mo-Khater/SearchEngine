@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) {
         int number_threads=3;
         ArrayList<String>Start_urls = new ArrayList<String>();
-        shared_memory memory = new shared_memory();
+        SharedMemory memory = new SharedMemory();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get("Start_Urls.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -32,7 +32,7 @@ public class Main {
         }
 
 
-        Crawler_System c=new Crawler_System(number_threads,memory,Start_urls);
+        CrawlerSystem c=new CrawlerSystem(number_threads,memory,Start_urls,"Start_Urls.txt");
         c.Start();
 
 
@@ -48,3 +48,5 @@ public class Main {
 
     }
 }
+
+//https://www.wikipedia.org/

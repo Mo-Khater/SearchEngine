@@ -16,10 +16,10 @@ public class Crawler implements Runnable{
 
     private int maxsize;
     private final int ID;
-    private shared_memory memory;
+    private SharedMemory memory;
 
 
-    public Crawler(int id,shared_memory s_m,int max_s)
+    public Crawler(int id, SharedMemory s_m, int max_s)
     {
         ID=id;
         maxsize=max_s;

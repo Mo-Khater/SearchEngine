@@ -3,18 +3,20 @@ import java.util.ArrayList;
 
 
 
-public class Crawler_System {
-    private int number_threads;
-    private shared_memory memory;
+public class CrawlerSystem {
+    private final int number_threads;
+    private SharedMemory memory;
     ArrayList<String> Start_urls;
     ArrayList<Thread> threads=new ArrayList<>();
     private long time_taken;
+    private final String filepath;
 
-    Crawler_System(int s,shared_memory s_m,ArrayList<String> s_u)
+    CrawlerSystem(int s, SharedMemory s_m, ArrayList<String> s_u,String fp)
     {
         number_threads = s;
         memory = s_m;
         Start_urls = s_u;
+        filepath=fp;
     }
 
     public void Start()
@@ -25,6 +27,13 @@ public class Crawler_System {
             memory.queue_offer(s);
             memory.map_add(s);
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            memory.saveState(filepath);
+            System.out.println("State Saved Successfully");
+            Runtime.getRuntime().halt(0);
+        }));
+
         for(int i=0;i<number_threads;i++)
             threads.add(new Thread(new Crawler(i,memory,300)));
 
