@@ -1,16 +1,15 @@
-import org.jsoup.Jsoup;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import java.io.File;
+
 import java.io.IOException;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.analysis.Analyzer;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
+
 
 public class Main {
    public String parseHtmlDoc(Document doc,String type)
@@ -48,21 +47,30 @@ public class Main {
 
     return result;
    }
-    public static ArrayList<String> afterStemmingandeliminatestopwords(Document doc,String type) {
+    public static void indexingandputindatabase(Document doc,String type,String tag,String Html) {
         Main main = new Main(); // Create an instance of Main class
-        return main.stemandremovestopwordsfunc(main.parseHtmlDoc(doc,type));
+        ArrayList<String> result= main.stemandremovestopwordsfunc(main.parseHtmlDoc(doc,type));
+        for (String element:result)
+        {
+            mongo.connectmongo(element,Html,tag);
+        }
     }
     public static void main(String[] args) throws IOException {
+
         ArrayList<String> ResultOfStemming=new ArrayList<>();
         try {
             // Load HTML file
-            File input = new File("example.html");
-            Document doc = Jsoup.parse(input, "UTF-8");
-            ArrayList<String> result = afterStemmingandeliminatestopwords(doc,"p");
-            for (String element:result)
-            {
-                System.out.print(element+" ");
-            }
+//            File input = new File("example.html");
+//            Document doc = Jsoup.parse(input, "UTF-8");
+//            indexingandputindatabase(doc,"p","normal","doc1");
+//            indexingandputindatabase(doc,"h1","Heading","doc1");
+//            indexingandputindatabase(doc,"title","title","doc1");
+//            indexingandputindatabase(doc, "li", "normal","doc1");
+            Main main=new Main();
+            ArrayList<String>result=main.stemandremovestopwordsfunc("apple");
+            System.out.print(mongo.df_count(result.get(0)));
+
+
         }catch (Exception e)
         {
             e.printStackTrace();
