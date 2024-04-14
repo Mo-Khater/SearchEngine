@@ -27,7 +27,8 @@ public class Main {
                     Start_urls.add(normUrl.toString());
                 }
             }
-        } catch (IOException | URISyntaxException e) {
+        }
+        catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
 

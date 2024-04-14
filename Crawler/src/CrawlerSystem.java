@@ -11,16 +11,14 @@ public class CrawlerSystem {
     private long time_taken;
     private final String filepath;
 
-    CrawlerSystem(int s, SharedMemory s_m, ArrayList<String> s_u,String fp)
-    {
+    CrawlerSystem(int s, SharedMemory s_m, ArrayList<String> s_u,String fp) {
         number_threads = s;
         memory = s_m;
         Start_urls = s_u;
         filepath=fp;
     }
 
-    public void Start()
-    {
+    public void Start() {
         // Start_urls are already normalized
         for(String s:Start_urls)
         {

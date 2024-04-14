@@ -10,13 +10,14 @@ import java.io.IOException;
 public class SharedMemory {
     private ConcurrentLinkedQueue<String> queue;
     private ConcurrentHashMap<String, Boolean> map;
-    private ConcurrentHashMap<String, Boolean> visited;
+    private ConcurrentHashMap<String, Boolean> updated_urls;
+    private ConcurrentHashMap<String, String> visited;
 
 
-    SharedMemory()
-    {
+    SharedMemory() {
         queue=new ConcurrentLinkedQueue<>();
         map = new ConcurrentHashMap<>();
+        updated_urls = new ConcurrentHashMap<>();
         visited = new ConcurrentHashMap<>();
     }
 
@@ -46,14 +47,32 @@ public class SharedMemory {
         return queue.poll();
     }
 
-    public void visited_add(String e)
+    public boolean visited_contains(String element) {
+        return visited.containsKey(element);
+    }
+
+    public String visited_get(String e){return visited.get(e);}
+
+    public void visited_add(String e,String hash)
     {
-        visited.put(e,true);
+        visited.put(e,hash);
     }
 
     public long visited_size()
     {
         return visited.size();
+    }
+
+    public void updated_urls_add(String element) {
+        updated_urls.put(element,true) ;
+    }
+
+    public boolean updated_urls_contains(String element) {
+        return updated_urls.containsKey(element);
+    }
+
+    public boolean updated_urls_remove(String element) {
+        return updated_urls.remove(element) != null;
     }
 
     public void saveState(String filePath){
