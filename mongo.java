@@ -36,6 +36,27 @@ public class mongo {
         }
         return 0;
     }
+    public static void putdocelments(String docid,ArrayList<String> docelments)
+    {
+        collection.insertOne(new Document("Docid", docid)
+                        .append("elements", docelments));
+    }
+    public static ArrayList<String> getdocelements(String docid)
+    {
+        @SuppressWarnings("unchecked")
+       ArrayList<String>docelements=(ArrayList<String>) collection.find(new Document("Docid",docid)).first().get("elements");
+        return docelements;
+    }
+    public static ArrayList<String> getworddocs(String word)
+    {
+        ArrayList<Document>docs=(ArrayList<Document>)collection.find(new Document("_id",word)).first().get("documents");
+        ArrayList<String>worddocs=new ArrayList<>();
+        for (Document document:docs)
+        {
+            worddocs.add((String) document.get("doc_id"));
+        }
+        return worddocs;
+    }
 
     public static ArrayList<String> metadata(String word, String doc) {
         Document document = collection.find(new Document("_id", word)).first();
