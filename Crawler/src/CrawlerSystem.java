@@ -26,14 +26,14 @@ public class CrawlerSystem {
             memory.map_add(s);
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            memory.saveState(filepath);
-            System.out.println("State Saved Successfully");
-            Runtime.getRuntime().halt(0);
-        }));
+//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//            memory.saveState(filepath);
+//            System.out.println("State Saved Successfully");
+//            Runtime.getRuntime().halt(0);
+//        }));
 
         for(int i=0;i<number_threads;i++)
-            threads.add(new Thread(new Crawler(i,memory,300)));
+            threads.add(new Thread(new Crawler(i,memory,2)));
 
         for(Thread t:threads)t.start();
 

@@ -11,7 +11,8 @@ public class SharedMemory {
     private ConcurrentLinkedQueue<String> queue;
     private ConcurrentHashMap<String, Boolean> map;
     private ConcurrentHashMap<String, Boolean> updated_urls;
-    private ConcurrentHashMap<String, String> visited;
+//    private ConcurrentHashMap<String, String> visited;
+    private ConcurrentHashMap<String, Boolean> visited;
 
 
     SharedMemory() {
@@ -51,15 +52,15 @@ public class SharedMemory {
         return visited.containsKey(element);
     }
 
-    public String visited_get(String e){return visited.get(e);}
+//    public String visited_get(String e){return visited.get(e);}
 
-    public void visited_add(String e,String hash)
-    {
-        visited.put(e,hash);
+//    public void visited_add(String e,String hash){visited.put(e,hash);}
+
+    public void visited_add(String e) {
+        visited.put(e,true);
     }
 
-    public long visited_size()
-    {
+    public long visited_size() {
         return visited.size();
     }
 

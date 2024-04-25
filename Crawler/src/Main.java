@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 public class Main {
 
     public static void main(String[] args) {
-        int number_threads=3;
+        int number_threads=2;
         ArrayList<String>Start_urls = new ArrayList<String>();
         SharedMemory memory = new SharedMemory();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get("Start_Urls.txt"))) {
@@ -46,6 +46,11 @@ public class Main {
 
         System.out.println("# Visited URLs = "+ memory.visited_size());
         System.out.println("Time taken = " + c.get_time());
+
+//        ArrayList<String>arr = mongo.getdocelements("doc1") ;
+//        for(String str : arr){
+//            System.out.println(str);
+//        }
 
     }
 }

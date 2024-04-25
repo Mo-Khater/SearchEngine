@@ -9,5 +9,10 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jsoup-1.17.2" level="project" />
     <orderEntry type="library" name="robotstxt-0.0.1" level="project" />
+    <orderEntry type="library" name="bson-5.0.1" level="project" />
+    <orderEntry type="library" name="mongodb-driver-core-5.0.1" level="project" />
+    <orderEntry type="library" name="mongodb-driver-sync-5.0.1" level="project" />
+    <orderEntry type="library" name="slf4j-api-2.0.7" level="project" />
+    <orderEntry type="library" name="slf4j-nop-2.0.7" level="project" />
   </component>
 </module>

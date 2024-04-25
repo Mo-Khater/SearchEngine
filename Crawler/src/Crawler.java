@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 
+
 import com.github.itechbear.robotstxt.RobotsMatcher;
 
 import javax.swing.*;
@@ -50,10 +51,6 @@ public class Crawler implements Runnable{
                 {
                     crawl(url);
                 }
-                else if(status==0)
-                {
-                    memory.queue_offer(url);
-                }
                 if (memory.visited_size() >= maxsize) {
                     return;
                 }
@@ -91,18 +88,20 @@ public class Crawler implements Runnable{
                         memory.queue_offer(norm_url);
 //                    System.out.println("ADDED TO QUEUE: "+ normalizedURI);
                     }
-                    else if(memory.visited_contains(norm_url)) {
-                        try{
-                            Document d = Jsoup.connect(norm_url).get();
-                            String content = d.outerHtml();
-                            String Hashed = calculateHash(content);
-                            if(!Hashed.equals(memory.visited_get(norm_url))){
-                                memory.visited_add(url,Hashed);
-                                memory.updated_urls_add(norm_url);
-                            }
-                        }
-                        catch (IOException e){}
-                    }
+//                    else if(memory.visited_contains(norm_url)) {
+//                        try{
+//                            Document d = Jsoup.connect(norm_url).get();
+//                            String content = d.outerHtml();
+//                            String Hashed = calculateHash(content);
+//                            if(!Hashed.equals(memory.visited_get(norm_url))){
+//                                memory.visited_add(url,Hashed);
+//                                memory.updated_urls_add(norm_url);
+//                            }
+//                        }
+//                        catch (IOException e){
+//                            e.printStackTrace();
+//                        }
+//                    }
                 }
             }
         }
@@ -114,9 +113,10 @@ public class Crawler implements Runnable{
             Document doc = con.get();
             if(con.response().statusCode() == 200)
             {
-                String content = doc.outerHtml();
-                String Hashed = calculateHash(content);
-                memory.visited_add(url,Hashed);
+//                String content = doc.outerHtml();
+//                String Hashed = calculateHash(content);
+                mongo.insert_crawler(url,(String) doc.outerHtml());
+                memory.visited_add(url);
                 memory.map_add(url);
                 System.out.println("thread "+ ID + ": added Link: " + url);
                 System.out.println(doc.title());
@@ -132,7 +132,7 @@ public class Crawler implements Runnable{
         }
     }
 
-    public static String getRobotUrl(String site) {
+    private static String getRobotUrl(String site) {
         URL a;
         try {
             // get the address of robots.txt
@@ -145,7 +145,7 @@ public class Crawler implements Runnable{
         }
     }
 
-    public static String fetchRobotsTxtOfSite(String str) {
+    private static String fetchRobotsTxtOfSite(String str) {
         String roboturl = getRobotUrl(str);
         String data = "";
         try {
@@ -161,7 +161,7 @@ public class Crawler implements Runnable{
         return data;
     }
 
-    public static int allowedRobot(String website) {
+    private static int allowedRobot(String website) {
         RobotsMatcher matcher = new RobotsMatcher();
         String robotstxt = fetchRobotsTxtOfSite(website);
         if(robotstxt.equals("cant connect")) return 0;
@@ -171,16 +171,16 @@ public class Crawler implements Runnable{
         return (a)? 1:-1;
     }
 
-    private static String calculateHash(String content) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(content.getBytes());
-            return Base64.getEncoder().encodeToString(hashBytes);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    private static String calculateHash(String content) {
+//        try {
+//            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+//            byte[] hashBytes = digest.digest(content.getBytes());
+//            return Base64.getEncoder().encodeToString(hashBytes);
+//        } catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
 }
 
