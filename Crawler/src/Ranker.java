@@ -53,10 +53,10 @@ public class Ranker {
             sumOfRanks += newPageRank;
 
         }
-            // Normalize PageRank values
-            for (String node : newPageRanks.keySet()) {
-                newPageRanks.put(node, newPageRanks.get(node) / sumOfRanks);
-            }
+        // Normalize PageRank values
+        for (String node : newPageRanks.keySet()) {
+            newPageRanks.put(node, newPageRanks.get(node) / sumOfRanks);
+        }
 
         return newPageRanks;
     }

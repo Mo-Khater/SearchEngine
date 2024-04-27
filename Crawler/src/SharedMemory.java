@@ -11,28 +11,16 @@ import java.io.IOException;
 public class SharedMemory {
     private ConcurrentLinkedQueue<Pair<String,String>> queue;
     private ConcurrentHashMap<String, Boolean> map;
-<<<<<<< Updated upstream
-=======
     private HashMap<String, HashSet<String>> Graph;
 //    private ConcurrentHashMap<String, String> visited;
->>>>>>> Stashed changes
     private ConcurrentHashMap<String, Boolean> visited;
     private boolean queueReachMaxSize;
-    private int maxsize;
 
 
-<<<<<<< Updated upstream
-    SharedMemory()
-    {
-        queue=new ConcurrentLinkedQueue<>();
-        map = new ConcurrentHashMap<>();
-=======
-    SharedMemory(int m) {
-        maxsize = m;
+    SharedMemory() {
         queue=new ConcurrentLinkedQueue<>();
         map = new ConcurrentHashMap<>();
         Graph = new HashMap<>();
->>>>>>> Stashed changes
         visited = new ConcurrentHashMap<>();
         queueReachMaxSize = false;
     }
@@ -68,10 +56,6 @@ public class SharedMemory {
         return queue.poll();
     }
 
-<<<<<<< Updated upstream
-    public void visited_add(String e)
-    {
-=======
     public long queue_size() {return queue.size();}
 
 
@@ -84,17 +68,13 @@ public class SharedMemory {
 //    public void visited_add(String e,String hash){visited.put(e,hash);}
 
     public void visited_add(String e) {
->>>>>>> Stashed changes
         visited.put(e,true);
     }
 
-    public long visited_size()
-    {
+    public long visited_size() {
         return visited.size();
     }
 
-<<<<<<< Updated upstream
-=======
     public synchronized void Graph_add(String child , String parent) {
         if(Graph.containsKey(child)) {
             Graph.get(child).add(parent);
@@ -120,7 +100,6 @@ public class SharedMemory {
 //        return updated_urls.remove(element) != null;
 //    }
 
->>>>>>> Stashed changes
     public void saveState(String filePath){
         try {
             FileWriter fileWriter = new FileWriter(filePath);

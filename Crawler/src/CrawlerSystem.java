@@ -12,12 +12,7 @@ public class CrawlerSystem {
     private final String filepath;
     private int maxsize;
 
-<<<<<<< Updated upstream
-    CrawlerSystem(int s, SharedMemory s_m, ArrayList<String> s_u,String fp)
-    {
-=======
     CrawlerSystem(int s, SharedMemory s_m, ArrayList<Pair<String,String>> s_u,String fp,int max) {
->>>>>>> Stashed changes
         number_threads = s;
         memory = s_m;
         Start_urls = s_u;
@@ -25,8 +20,7 @@ public class CrawlerSystem {
         maxsize = max;
     }
 
-    public void Start()
-    {
+    public void Start() {
         // Start_urls are already normalized
         for(Pair<String,String> s:Start_urls)
         {
@@ -34,18 +28,14 @@ public class CrawlerSystem {
             memory.map_add(s.getfirst());
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            memory.saveState(filepath);
-            System.out.println("State Saved Successfully");
-            Runtime.getRuntime().halt(0);
-        }));
+//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//            memory.saveState(filepath);
+//            System.out.println("State Saved Successfully");
+//            Runtime.getRuntime().halt(0);
+//        }));
 
         for(int i=0;i<number_threads;i++)
-<<<<<<< Updated upstream
-            threads.add(new Thread(new Crawler(i,memory,300)));
-=======
             threads.add(new Thread(new Crawler(i,memory,maxsize)));
->>>>>>> Stashed changes
 
         for(Thread t:threads)t.start();
 

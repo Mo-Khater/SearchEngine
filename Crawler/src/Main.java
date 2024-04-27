@@ -14,16 +14,10 @@ import java.util.HashSet;
 public class Main {
 
     public static void main(String[] args) {
-<<<<<<< Updated upstream
-        int number_threads=3;
-        ArrayList<String>Start_urls = new ArrayList<String>();
-        SharedMemory memory = new SharedMemory();
-=======
         int number_threads = 7;
         int maxsize = 1000;
         ArrayList<Pair<String,String>>Start_urls = new ArrayList<Pair<String,String>>();
-        SharedMemory memory = new SharedMemory(maxsize);
->>>>>>> Stashed changes
+        SharedMemory memory = new SharedMemory();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get("Start_Urls.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -45,7 +39,8 @@ public class Main {
                     Start_urls.add(new Pair<>(normUrl.toString(),second));
                 }
             }
-        } catch (IOException | URISyntaxException e) {
+        }
+        catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
 
@@ -73,8 +68,6 @@ public class Main {
 
         //System.out.println(memory.Graph_size());
 
-<<<<<<< Updated upstream
-=======
 //        ArrayList<String>arr = mongo.getdocelements("doc1") ;
 //        for(String str : arr){
 //            System.out.println(str);
@@ -83,7 +76,6 @@ public class Main {
         System.out.println("pagerank algorithm here");
         Ranker rank = new Ranker(0,memory.get_Graph());
         rank.calcPageRank();
->>>>>>> Stashed changes
     }
 }
 

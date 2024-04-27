@@ -7,10 +7,17 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
+
 
 import com.github.itechbear.robotstxt.RobotsMatcher;
 
 import javax.swing.*;
+
+
 
 public class Crawler implements Runnable{
 
@@ -19,8 +26,7 @@ public class Crawler implements Runnable{
     private SharedMemory memory;
 
 
-    public Crawler(int id, SharedMemory s_m, int max_s)
-    {
+    public Crawler(int id, SharedMemory s_m, int max_s) {
         ID=id;
         maxsize=max_s;
         memory=s_m;
@@ -32,8 +38,7 @@ public class Crawler implements Runnable{
         start_crawl();
     }
 
-    private void start_crawl()
-    {
+    private void start_crawl() {
         while (true) {
             Pair<String,String> pair = memory.queue_poll();
             if (pair == null) {
@@ -41,18 +46,11 @@ public class Crawler implements Runnable{
                     return;
                 }
             } else {
-<<<<<<< Updated upstream
-//                if (allowedRobot(url))
-//                {
-                    crawl(url);
-//                }
-=======
                 int status=allowedRobot(pair.getfirst());
                 if (status==1)
                 {
                     crawl(pair);
                 }
->>>>>>> Stashed changes
                 if (memory.visited_size() >= maxsize) {
                     return;
                 }
@@ -60,12 +58,7 @@ public class Crawler implements Runnable{
         }
     }
 
-<<<<<<< Updated upstream
-    private void crawl(String url)
-    {
-=======
     private void crawl(Pair<String,String> url) {
->>>>>>> Stashed changes
         Document doc=request(url);
         if(doc != null) {
             for (Element link : doc.select("a[href]")) {
@@ -88,18 +81,10 @@ public class Crawler implements Runnable{
 //                    throw new RuntimeException(e);
                 }
 
-<<<<<<< Updated upstream
-
-                if(normalizedURI != null && !memory.map_contains(normalizedURI.toString()))
-                {
-                    memory.map_add(normalizedURI.toString());
-                    memory.queue_offer(normalizedURI.toString());
-//                    System.out.println("ADDED TO QUEUE: "+ normalizedURI);
-=======
                 if(normalizedURI != null) {
                     String norm_url = normalizedURI.toString();
                     //if (!memory.isqueueReachMaxSize()) {
-                        //memory.Graph_add(url, norm_url);
+                    //memory.Graph_add(url, norm_url);
                     if(memory.visited_contains(norm_url)){
                         memory.Graph_add(norm_url,url.getfirst());
                     }
@@ -123,28 +108,17 @@ public class Crawler implements Runnable{
 //                        }
 //                    }
                     //}
->>>>>>> Stashed changes
                 }
             }
         }
     }
 
-<<<<<<< Updated upstream
-    private Document request(String url)
-    {
-=======
     private Document request(Pair<String,String> url) {
->>>>>>> Stashed changes
         try{
             Connection con = Jsoup.connect(url.getfirst());
             Document doc = con.get();
             if(con.response().statusCode() == 200)
             {
-<<<<<<< Updated upstream
-                memory.visited_add(url);
-                memory.map_add(url);
-                System.out.println("thread "+ ID + ": added Link: " + url);
-=======
 //                String content = doc.outerHtml();
 //                String Hashed = calculateHash(content);
 //                mongo.insert_crawler(url.getfirst(),(String) doc.outerHtml());
@@ -152,30 +126,25 @@ public class Crawler implements Runnable{
                 memory.visited_add(url.getfirst());
                 memory.map_add(url.getfirst());
                 System.out.println("thread "+ ID + ": added Link: " + url.getfirst());
->>>>>>> Stashed changes
                 System.out.println(doc.title());
                 System.out.println(memory.visited_size());
                 return doc;
             }
-            return null;
+            throw new IOException();
         }
         catch (IOException e)
         {
-<<<<<<< Updated upstream
-=======
             memory.queue_offer(url.getfirst(),url.getsecond());
->>>>>>> Stashed changes
             return null;
         }
     }
 
-    public static String getRobotUrl(String site)
-    {
+    private static String getRobotUrl(String site) {
         URL a;
         try {
             // get the address of robots.txt
             a = new URI(site).toURL();
-            String s = a.getProtocol() + "://" + a.getHost().toString()+"/robots.txt";
+            String s = a.getProtocol() + "://" + a.getHost().toString() + "/robots.txt";
             return s;
         } catch (MalformedURLException | URISyntaxException e) {
             e.printStackTrace();
@@ -183,29 +152,42 @@ public class Crawler implements Runnable{
         }
     }
 
-    public static String fetchRobotsTxtOfSite(String str)
-    {
+    private static String fetchRobotsTxtOfSite(String str) {
         String roboturl = getRobotUrl(str);
         String data = "";
         try {
-            URL a = new URI(roboturl).toURL();
-            Connection con = Jsoup.connect(a.toString());
+            Connection con = Jsoup.connect(roboturl);
             Document doc = con.get();
-            if (con.response().statusCode() == 200)
-            {
+            if (con.response().statusCode() == 200) {
                 data = doc.wholeText();
             }
-        } catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("cant connect: " + roboturl);
+            data="cant connect";
         }
         return data;
     }
 
-    public static boolean allowedRobot(String website) {
+    private static int allowedRobot(String website) {
         RobotsMatcher matcher = new RobotsMatcher();
         String robotstxt = fetchRobotsTxtOfSite(website);
-        boolean a= matcher.OneAgentAllowedByRobots(robotstxt, "*", website);
+        if(robotstxt.equals("cant connect")) return 0;
+        boolean a = matcher.OneAgentAllowedByRobots(robotstxt, "*", website);
 //        System.out.println(a);
-        return a;
+//        System.out.println(robotstxt);
+        return (a)? 1:-1;
     }
+
+//    private static String calculateHash(String content) {
+//        try {
+//            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+//            byte[] hashBytes = digest.digest(content.getBytes());
+//            return Base64.getEncoder().encodeToString(hashBytes);
+//        } catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
+
 }
+
