@@ -1,3 +1,4 @@
+import java.io.FileReader;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
@@ -17,6 +18,7 @@ public class Main {
         int number_threads = 7;
         int maxsize = 1000;
         ArrayList<Pair<String,String>>Start_urls = new ArrayList<Pair<String,String>>();
+        ArrayList<String>visited_urls = new ArrayList<String>();
         SharedMemory memory = new SharedMemory();
         try (BufferedReader reader = Files.newBufferedReader(Paths.get("Start_Urls.txt"))) {
             String line;
@@ -24,11 +26,8 @@ public class Main {
                 // Normalize URLs before adding them to Start_urls
                 String[] parts = line.split(" ");
                 String first = parts[0];
-                String second;
-                if(parts.length == 1) {
-                    second = null;
-                }
-                else {
+                String second = null;
+                if(parts.length > 1) {
                     second = parts[1];
                 }
                 URI orgURI = new URI(first);
@@ -39,13 +38,20 @@ public class Main {
                     Start_urls.add(new Pair<>(normUrl.toString(),second));
                 }
             }
-        }
-        catch (IOException | URISyntaxException e) {
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
 
+        try (BufferedReader br = new BufferedReader(new FileReader("visited.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                visited_urls.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        CrawlerSystem c=new CrawlerSystem(number_threads,memory,Start_urls,"Start_Urls.txt",maxsize);
+        CrawlerSystem c=new CrawlerSystem(number_threads,memory,Start_urls,visited_urls,"Start_Urls.txt",maxsize);
         c.Start();
 
 

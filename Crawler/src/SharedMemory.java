@@ -121,6 +121,26 @@ public class SharedMemory {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+        try {
+            FileWriter fileWriter = new FileWriter("visited.txt");
+            fileWriter.close();
+            System.out.println("File cleared successfully.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        try {
+            FileWriter fileWriter = new FileWriter("visited.txt");
+            for (HashMap.Entry<String, Boolean> entry : visited.entrySet()) {
+                String key = entry.getKey();
+                fileWriter.write(key + "\n");
+            }
+            fileWriter.close();
+            System.out.println("Queue contents saved to file successfully.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
 }
