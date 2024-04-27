@@ -1,3 +1,5 @@
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.FileWriter;
@@ -6,20 +8,38 @@ import java.io.IOException;
 
 
 
-
 public class SharedMemory {
-    private ConcurrentLinkedQueue<String> queue;
+    private ConcurrentLinkedQueue<Pair<String,String>> queue;
     private ConcurrentHashMap<String, Boolean> map;
+<<<<<<< Updated upstream
+=======
+    private HashMap<String, HashSet<String>> Graph;
+//    private ConcurrentHashMap<String, String> visited;
+>>>>>>> Stashed changes
     private ConcurrentHashMap<String, Boolean> visited;
+    private boolean queueReachMaxSize;
+    private int maxsize;
 
 
+<<<<<<< Updated upstream
     SharedMemory()
     {
         queue=new ConcurrentLinkedQueue<>();
         map = new ConcurrentHashMap<>();
+=======
+    SharedMemory(int m) {
+        maxsize = m;
+        queue=new ConcurrentLinkedQueue<>();
+        map = new ConcurrentHashMap<>();
+        Graph = new HashMap<>();
+>>>>>>> Stashed changes
         visited = new ConcurrentHashMap<>();
+        queueReachMaxSize = false;
     }
 
+    public boolean isqueueReachMaxSize() {
+        return queueReachMaxSize;
+    }
 
     public void map_add(String element) {
         map.put(element,true) ;
@@ -33,21 +53,38 @@ public class SharedMemory {
         return map.remove(element) != null;
     }
 
-    public void queue_offer(String element) {
-        queue.offer(element);
+    public void queue_offer(String child, String parent) {
+        queue.offer(new Pair<>(child,parent));
+//        if(queue.size() == maxsize)
+//            queueReachMaxSize=true;
     }
 
     public boolean queue_contains(String element) {
         return queue.contains(element);
     }
 
-    public String queue_poll() {
+    public Pair<String, String> queue_poll() {
         if(queue.isEmpty())return null;
         return queue.poll();
     }
 
+<<<<<<< Updated upstream
     public void visited_add(String e)
     {
+=======
+    public long queue_size() {return queue.size();}
+
+
+    public boolean visited_contains(String element) {
+        return visited.containsKey(element);
+    }
+
+//    public String visited_get(String e){return visited.get(e);}
+
+//    public void visited_add(String e,String hash){visited.put(e,hash);}
+
+    public void visited_add(String e) {
+>>>>>>> Stashed changes
         visited.put(e,true);
     }
 
@@ -56,6 +93,34 @@ public class SharedMemory {
         return visited.size();
     }
 
+<<<<<<< Updated upstream
+=======
+    public synchronized void Graph_add(String child , String parent) {
+        if(Graph.containsKey(child)) {
+            Graph.get(child).add(parent);
+        }
+        else{
+            HashSet<String> temp = new HashSet<>();
+            temp.add(parent);
+            Graph.put(child,temp);
+        }
+    }
+
+    public int Graph_size(){
+        return Graph.size();
+    }
+
+    public HashMap<String, HashSet<String>> get_Graph() {return Graph;}
+
+//    public boolean updated_urls_contains(String element) {
+//        return updated_urls.containsKey(element);
+//    }
+//
+//    public boolean updated_urls_remove(String element) {
+//        return updated_urls.remove(element) != null;
+//    }
+
+>>>>>>> Stashed changes
     public void saveState(String filePath){
         try {
             FileWriter fileWriter = new FileWriter(filePath);
@@ -68,8 +133,8 @@ public class SharedMemory {
         try {
             FileWriter fileWriter = new FileWriter(filePath);
             while (!queue.isEmpty()) {
-                String element = queue.poll();
-                fileWriter.write(element + "\n");
+                Pair<String,String> element = queue.poll();
+                fileWriter.write( element.getfirst()+ " "+ element.getsecond() + "\n");
             }
             fileWriter.close();
             System.out.println("Queue contents saved to file successfully.");

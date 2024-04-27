@@ -6,25 +6,43 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 
 
 public class Main {
 
     public static void main(String[] args) {
+<<<<<<< Updated upstream
         int number_threads=3;
         ArrayList<String>Start_urls = new ArrayList<String>();
         SharedMemory memory = new SharedMemory();
+=======
+        int number_threads = 7;
+        int maxsize = 1000;
+        ArrayList<Pair<String,String>>Start_urls = new ArrayList<Pair<String,String>>();
+        SharedMemory memory = new SharedMemory(maxsize);
+>>>>>>> Stashed changes
         try (BufferedReader reader = Files.newBufferedReader(Paths.get("Start_Urls.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 // Normalize URLs before adding them to Start_urls
-                URI orgURI = new URI(line);
+                String[] parts = line.split(" ");
+                String first = parts[0];
+                String second;
+                if(parts.length == 1) {
+                    second = null;
+                }
+                else {
+                    second = parts[1];
+                }
+                URI orgURI = new URI(first);
                 URL check = orgURI.toURL(); // THIS LINE WILL THROW EXCEPTION IF URL IS INVALID
 
                 URI normUrl = new URI(orgURI.getScheme(), orgURI.getAuthority(), orgURI.getPath(), null, null);
                 if (!normUrl.toString().isEmpty() && !Start_urls.contains(normUrl.toString())) {
-                    Start_urls.add(normUrl.toString());
+                    Start_urls.add(new Pair<>(normUrl.toString(),second));
                 }
             }
         } catch (IOException | URISyntaxException e) {
@@ -32,7 +50,7 @@ public class Main {
         }
 
 
-        CrawlerSystem c=new CrawlerSystem(number_threads,memory,Start_urls,"Start_Urls.txt");
+        CrawlerSystem c=new CrawlerSystem(number_threads,memory,Start_urls,"Start_Urls.txt",maxsize);
         c.Start();
 
 
@@ -42,10 +60,30 @@ public class Main {
 //            s = memory.queue_poll();
 //        }
 
-
+        System.out.println("queue size : " + memory.queue_size());
+        System.out.println("Graph size : " + memory.Graph_size());
         System.out.println("# Visited URLs = "+ memory.visited_size());
         System.out.println("Time taken = " + c.get_time());
+        //System.out.println(memory.get_Graph());
+//        for (HashMap.Entry<String, HashSet<String>> entry : memory.get_Graph().entrySet()) {
+//            String key = entry.getKey();
+//            int setSize = entry.getValue().size();
+//            System.out.println(key + " " + setSize);
+//        }
 
+        //System.out.println(memory.Graph_size());
+
+<<<<<<< Updated upstream
+=======
+//        ArrayList<String>arr = mongo.getdocelements("doc1") ;
+//        for(String str : arr){
+//            System.out.println(str);
+//        }
+        //test rankpage algo
+        System.out.println("pagerank algorithm here");
+        Ranker rank = new Ranker(0,memory.get_Graph());
+        rank.calcPageRank();
+>>>>>>> Stashed changes
     }
 }
 

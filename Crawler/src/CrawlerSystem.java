@@ -6,26 +6,32 @@ import java.util.ArrayList;
 public class CrawlerSystem {
     private final int number_threads;
     private SharedMemory memory;
-    ArrayList<String> Start_urls;
+    ArrayList<Pair<String,String>> Start_urls;
     ArrayList<Thread> threads=new ArrayList<>();
     private long time_taken;
     private final String filepath;
+    private int maxsize;
 
+<<<<<<< Updated upstream
     CrawlerSystem(int s, SharedMemory s_m, ArrayList<String> s_u,String fp)
     {
+=======
+    CrawlerSystem(int s, SharedMemory s_m, ArrayList<Pair<String,String>> s_u,String fp,int max) {
+>>>>>>> Stashed changes
         number_threads = s;
         memory = s_m;
         Start_urls = s_u;
         filepath=fp;
+        maxsize = max;
     }
 
     public void Start()
     {
         // Start_urls are already normalized
-        for(String s:Start_urls)
+        for(Pair<String,String> s:Start_urls)
         {
-            memory.queue_offer(s);
-            memory.map_add(s);
+            memory.queue_offer(s.getfirst(),s.getsecond());
+            memory.map_add(s.getfirst());
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -35,7 +41,11 @@ public class CrawlerSystem {
         }));
 
         for(int i=0;i<number_threads;i++)
+<<<<<<< Updated upstream
             threads.add(new Thread(new Crawler(i,memory,300)));
+=======
+            threads.add(new Thread(new Crawler(i,memory,maxsize)));
+>>>>>>> Stashed changes
 
         for(Thread t:threads)t.start();
 

@@ -35,16 +35,24 @@ public class Crawler implements Runnable{
     private void start_crawl()
     {
         while (true) {
-            String url = memory.queue_poll();
-            if (url == null) {
+            Pair<String,String> pair = memory.queue_poll();
+            if (pair == null) {
                 if (memory.visited_size() >= maxsize) {
                     return;
                 }
             } else {
+<<<<<<< Updated upstream
 //                if (allowedRobot(url))
 //                {
                     crawl(url);
 //                }
+=======
+                int status=allowedRobot(pair.getfirst());
+                if (status==1)
+                {
+                    crawl(pair);
+                }
+>>>>>>> Stashed changes
                 if (memory.visited_size() >= maxsize) {
                     return;
                 }
@@ -52,8 +60,12 @@ public class Crawler implements Runnable{
         }
     }
 
+<<<<<<< Updated upstream
     private void crawl(String url)
     {
+=======
+    private void crawl(Pair<String,String> url) {
+>>>>>>> Stashed changes
         Document doc=request(url);
         if(doc != null) {
             for (Element link : doc.select("a[href]")) {
@@ -63,7 +75,7 @@ public class Crawler implements Runnable{
                 URI normalizedURI = null;
 
                 // now check if there exists a malformed URL
-                try {;
+                try {
                     originalURI = new URI(nextlink);
                     URL  check = originalURI.toURL(); // THIS LINE WILL THROW EXCEPTION IF URL IS INVALID
 //                    System.out.println("original URI (next link): " + originalURI);
@@ -76,27 +88,71 @@ public class Crawler implements Runnable{
 //                    throw new RuntimeException(e);
                 }
 
+<<<<<<< Updated upstream
 
                 if(normalizedURI != null && !memory.map_contains(normalizedURI.toString()))
                 {
                     memory.map_add(normalizedURI.toString());
                     memory.queue_offer(normalizedURI.toString());
 //                    System.out.println("ADDED TO QUEUE: "+ normalizedURI);
+=======
+                if(normalizedURI != null) {
+                    String norm_url = normalizedURI.toString();
+                    //if (!memory.isqueueReachMaxSize()) {
+                        //memory.Graph_add(url, norm_url);
+                    if(memory.visited_contains(norm_url)){
+                        memory.Graph_add(norm_url,url.getfirst());
+                    }
+                    if (!memory.map_contains(norm_url)) {
+                        memory.map_add(norm_url);
+                        memory.queue_offer(norm_url,url.getfirst());
+//                    System.out.println("ADDED TO QUEUE: "+ normalizedURI);
+                    }
+//                    else if(memory.visited_contains(norm_url)) {
+//                        try{
+//                            Document d = Jsoup.connect(norm_url).get();
+//                            String content = d.outerHtml();
+//                            String Hashed = calculateHash(content);
+//                            if(!Hashed.equals(memory.visited_get(norm_url))){
+//                                memory.visited_add(url,Hashed);
+//                                memory.updated_urls_add(norm_url);
+//                            }
+//                        }
+//                        catch (IOException e){
+//                            e.printStackTrace();
+//                        }
+//                    }
+                    //}
+>>>>>>> Stashed changes
                 }
             }
         }
     }
 
+<<<<<<< Updated upstream
     private Document request(String url)
     {
+=======
+    private Document request(Pair<String,String> url) {
+>>>>>>> Stashed changes
         try{
-            Connection con = Jsoup.connect(url);
+            Connection con = Jsoup.connect(url.getfirst());
             Document doc = con.get();
             if(con.response().statusCode() == 200)
             {
+<<<<<<< Updated upstream
                 memory.visited_add(url);
                 memory.map_add(url);
                 System.out.println("thread "+ ID + ": added Link: " + url);
+=======
+//                String content = doc.outerHtml();
+//                String Hashed = calculateHash(content);
+//                mongo.insert_crawler(url.getfirst(),(String) doc.outerHtml());
+                memory.Graph_add(url.getfirst(),url.getsecond());
+                memory.visited_add(url.getfirst());
+                memory.map_add(url.getfirst());
+                System.out.println("thread "+ ID + ": added Link: " + url.getfirst());
+>>>>>>> Stashed changes
                 System.out.println(doc.title());
                 System.out.println(memory.visited_size());
                 return doc;
@@ -105,6 +161,10 @@ public class Crawler implements Runnable{
         }
         catch (IOException e)
         {
+<<<<<<< Updated upstream
+=======
+            memory.queue_offer(url.getfirst(),url.getsecond());
+>>>>>>> Stashed changes
             return null;
         }
     }
