@@ -17,6 +17,7 @@ public class Ranker {
     private HashMap<String, Double> pageRanks;
     private int numIter;
     private boolean isPageRankedDone;
+    public long time_taken;
 
     // To connect to Mongo and update db
     static MongoClient mongoClient= MongoClients.create("mongodb+srv://admin:68071299@cluster0.vvgixko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
@@ -25,7 +26,9 @@ public class Ranker {
 
     // test TF-IDF only
     public static void main(String[] args) {
-        Ranker.appendTF_IDF("love");
+//        Ranker.appendTF_IDF("love");
+//        mongo.remove_collection_Pagerank();
+//        mongo.remove_collection_Crawler();
     }
 
     public Ranker(double e,HashMap<String, HashSet<String>> g){
@@ -36,6 +39,7 @@ public class Ranker {
     }
 
     public void calcPageRank() {
+        long start_time = System.currentTimeMillis();
         numIter = 0;
         HashMap<String, Double> pr = new HashMap<String, Double>();
         for(String s : Graph.keySet()) {
@@ -50,9 +54,12 @@ public class Ranker {
             pr = nextIter;
             numIter++;
         }
+        long end_time = System.currentTimeMillis();
+        time_taken = (end_time-start_time)/1000;
         pageRanks = pr;
         isPageRankedDone = true;
         System.out.println(pageRanks);
+        mongo.insert_pagerank(pageRanks);
     }
 
     private HashMap<String, Double> singleIterationCalcPageRank(HashMap<String, Double> pr) {

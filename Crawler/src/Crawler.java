@@ -121,7 +121,7 @@ public class Crawler implements Runnable{
             {
 //                String content = doc.outerHtml();
 //                String Hashed = calculateHash(content);
-//                mongo.insert_crawler(url.getfirst(),(String) doc.outerHtml());
+                mongo.insert_crawler(url.getfirst(),(String) doc.outerHtml());
                 memory.Graph_add(url.getfirst(),url.getsecond());
                 memory.visited_add(url.getfirst());
                 memory.map_add(url.getfirst());
@@ -178,16 +178,6 @@ public class Crawler implements Runnable{
         return (a)? 1:-1;
     }
 
-//    private static String calculateHash(String content) {
-//        try {
-//            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-//            byte[] hashBytes = digest.digest(content.getBytes());
-//            return Base64.getEncoder().encodeToString(hashBytes);
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
 
 }
 

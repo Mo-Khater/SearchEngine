@@ -82,6 +82,8 @@ public class Main {
         System.out.println("pagerank algorithm here");
         Ranker rank = new Ranker(0,memory.get_Graph());
         rank.calcPageRank();
+        while(!rank.get_isPageRankDone()){}
+        System.out.println("time taken to calculate pagerank : " + rank.time_taken);
     }
 }
 
