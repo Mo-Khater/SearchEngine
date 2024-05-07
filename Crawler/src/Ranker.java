@@ -19,16 +19,14 @@ public class Ranker {
     private boolean isPageRankedDone;
     public long time_taken;
 
-    // To connect to Mongo and update db
-    static MongoClient mongoClient= MongoClients.create("mongodb+srv://admin:68071299@cluster0.vvgixko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
-    static MongoDatabase database = mongoClient.getDatabase("SearchEngine");
-    static MongoCollection<Document> collection = database.getCollection("TF_IDF_Test");
 
     // test TF-IDF only
     public static void main(String[] args) {
-//        Ranker.appendTF_IDF("love");
-//        mongo.remove_collection_Pagerank();
-//        mongo.remove_collection_Crawler();
+        HashMap<String, Double> pageRanks = mongo.getPageRanks();
+        HashMap<String, Integer> numWords = mongo.getNumWords();
+        System.out.println(pageRanks.get("https://be.wikipedia.org/"));
+        System.out.println(numWords.get("https://be.wikipedia.org/"));
+        appendFinalScore("take");
     }
 
     public Ranker(double e,HashMap<String, HashSet<String>> g){
@@ -106,13 +104,22 @@ public class Ranker {
      * This function takes a token and calculates the TF-IDF for all the documents
      * in which this word appears.
      * */
-    public static void appendTF_IDF(String token) {
-        System.out.println("Appending TF-IDF for the token '" + token+"'");
-        long countAll = collection.countDocuments();
+    public static void appendFinalScore(String token) {
+
+        MongoCollection<Document> collection = mongo.getWordsCollection();
+
+        // get page ranks (from pagerank collection) to append the final score directly
+        HashMap<String, Double> docs_pageRanks = mongo.getPageRanks();
+
+        // get numWords (from docs collection)
+        HashMap<String, Integer> docs_numWords = mongo.getNumWords();
+
+        System.out.println("Appending Final score for the token '" + token+"'");
+        long countAll = mongo.getNumOfDocs();
         // Normalized TF = term count / number of words in doc
         // IDF = log (#docs in db / DF)
         // TF_IDF = nTF * IDF
-        Document filter = new Document("_id", token);
+        Document filter = new Document("wordID", token);
         Document doc = collection.find(filter).first();
         assert doc != null;
         ArrayList<Document> documents = (ArrayList<Document>) doc.get("documents");
@@ -121,14 +128,25 @@ public class Ranker {
         int i = 0;
         for (Document d : documents) {
             int tf = d.getInteger("tf");
-            int numWords = d.getInteger("numWords");
+            int numWords = docs_numWords.get(d.getString("url"));
             double normTF = (double) tf / numWords;
             double TFIDF = IDF * normTF;
-            d.append("TF_IDF", TFIDF);
+
+            // get pageRank of this URL
+            double pgrnk = -1;
+            pgrnk = docs_pageRanks.get(d.get("url"));
+            if (pgrnk == -1) {
+                System.out.println("URL NOT FOUND IN MAP");
+                return;
+            }
+
+            double final_score = TFIDF * pgrnk * 10000;
+
+            d.append("final_score", final_score);
             Document update = new Document();
             update.append("$set", new Document("documents." + i, d));
             collection.updateOne(filter, update);
-            System.out.println(d.get("doc_id") +"\t" + TFIDF);
+            System.out.println(d.get("url") +"\t" + final_score);
             i++;
         }
 
