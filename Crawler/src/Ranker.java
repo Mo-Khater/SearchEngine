@@ -1,11 +1,10 @@
 import java.util.HashMap;
 import java.util.HashSet;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import org.bson.Document;
+
+import javax.lang.model.type.NullType;
 import java.util.ArrayList;
 import java.lang.Math;
 
@@ -26,7 +25,7 @@ public class Ranker {
         HashMap<String, Integer> numWords = mongo.getNumWords();
         System.out.println(pageRanks.get("https://be.wikipedia.org/"));
         System.out.println(numWords.get("https://be.wikipedia.org/"));
-        appendFinalScore("take");
+        appendFinalScoreForAll();
     }
 
     public Ranker(double e,HashMap<String, HashSet<String>> g){
@@ -146,10 +145,71 @@ public class Ranker {
             Document update = new Document();
             update.append("$set", new Document("documents." + i, d));
             collection.updateOne(filter, update);
-            System.out.println(d.get("url") +"\t" + final_score);
+//            System.out.println(d.get("url") +"\t" + final_score);
             i++;
         }
+    }
 
+    public static void appendFinalScoreForAll() {
+
+        MongoCollection<Document> collection = mongo.getWordsCollection();
+
+        // get page ranks (from pagerank collection) to append the final score directly
+        HashMap<String, Double> docs_pageRanks = mongo.getPageRanks();
+
+        // get numWords (from docs collection)
+        HashMap<String, Integer> docs_numWords = mongo.getNumWords();
+        long countAll = mongo.getNumOfDocs();
+        // Normalized TF = term count / number of words in doc
+        // IDF = log (#docs in db / DF)
+        // TF_IDF = nTF * IDF
+//        Document filter = new Document("wordID", token);
+
+        // Find all documents (empty filter)
+        FindIterable<Document> collection_documents = collection.find();
+
+        // Use a cursor to iterate through documents
+        MongoCursor<Document> cursor = collection_documents.iterator();
+        while (cursor.hasNext()) {
+            Document document = cursor.next();
+            Document filter = new Document("wordID", document.get("wordID"));
+            System.out.println("Appending Final score for the token '" + document.get("wordID") + "'");
+            ArrayList<Document> documents = (ArrayList<Document>) document.get("documents");
+            long DF = documents.size();
+            double IDF = Math.log((double) countAll / DF);
+            int i = 0;
+            for (Document d : documents) {
+                int tf = d.getInteger("tf");
+                String currURL = d.getString("url");
+                if (docs_numWords.get(currURL) == null) {
+                    continue;
+                }
+                int numWords = docs_numWords.get(currURL);
+                double normTF = (double) tf / numWords;
+                double TFIDF = IDF * normTF;
+
+                // get pageRank of this URL
+                double pgrnk = -1;
+                pgrnk = docs_pageRanks.get(d.get("url"));
+                if (pgrnk == -1) {
+                    System.out.println("URL NOT FOUND IN MAP");
+                    return;
+                }
+
+                double final_score = TFIDF * pgrnk * 10000;
+
+                d.append("final_score", final_score);
+                Document update = new Document();
+                update.append("$set", new Document("documents." + i, d));
+                collection.updateOne(filter, update);
+                System.out.println(d.get("url") +"\t" + final_score);
+                i++;
+            }
+
+        }
+
+        // Always close the cursor to release resources
+        cursor.close();
     }
 
 }
