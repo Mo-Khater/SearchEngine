@@ -1,10 +1,8 @@
-import java.io.FileReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -15,11 +13,21 @@ import java.util.HashSet;
 public class Main {
 
     public static void main(String[] args) {
-        int number_threads = 5;
-        int maxsize = 3;
+        int number_threads = 7;
+        int maxsize = 7000;
         ArrayList<Pair<String,String>>Start_urls = new ArrayList<Pair<String,String>>();
         ArrayList<String>visited_urls = new ArrayList<String>();
+        HashMap<String, HashSet<String>> newGraph = null;
         SharedMemory memory = new SharedMemory();
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("graph.ser"))) {
+            newGraph = (HashMap<String, HashSet<String>>) ois.readObject();
+        }  catch (FileNotFoundException e) {
+            //System.err.println("File not found: graph.ser");
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
         try (BufferedReader reader = Files.newBufferedReader(Paths.get("Start_Urls.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -51,35 +59,24 @@ public class Main {
             e.printStackTrace();
         }
 
-        CrawlerSystem c=new CrawlerSystem(number_threads,memory,Start_urls,visited_urls,"Start_Urls.txt",maxsize);
+        CrawlerSystem c=new CrawlerSystem(number_threads,memory,Start_urls,visited_urls,newGraph,maxsize);
         c.Start();
 
 
-//        String s = memory.queue_poll();
-//        while (s != null) {
-//            System.out.println(s);
-//            s = memory.queue_poll();
-//        }
 
         System.out.println("queue size : " + memory.queue_size());
         System.out.println("Graph size : " + memory.Graph_size());
         System.out.println("# Visited URLs = "+ memory.visited_size());
         System.out.println("Time taken = " + c.get_time());
-//        System.out.println(memory.get_Graph());
-//        for (HashMap.Entry<String, HashSet<String>> entry : memory.get_Graph().entrySet()) {
-//            String key = entry.getKey();
-//            int setSize = entry.getValue().size();
-//            System.out.println(key + " " + setSize);
-//        }
 
 
 
         //test rankpage algo
-//        System.out.println("pagerank algorithm here");
-//        Ranker rank = new Ranker(0,memory.get_Graph());
-//        rank.calcPageRank();
-//        while(!rank.get_isPageRankDone()){}
-//        System.out.println("time taken to calculate pagerank : " + rank.time_taken);
+        System.out.println("pagerank algorithm here");
+        Ranker rank = new Ranker(0,memory.get_Graph());
+        rank.calcPageRank();
+        while(!rank.get_isPageRankDone()){}
+        System.out.println("time taken to calculate pagerank : " + rank.time_taken);
     }
 }
 

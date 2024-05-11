@@ -71,15 +71,9 @@ public class Crawler implements Runnable{
                 try {
                     originalURI = new URI(nextlink);
                     URL  check = originalURI.toURL(); // THIS LINE WILL THROW EXCEPTION IF URL IS INVALID
-//                    System.out.println("original URI (next link): " + originalURI);
 
                     normalizedURI = new URI(originalURI.getScheme(), originalURI.getAuthority(), originalURI.getPath(), null, null);
-//                    System.out.println("Normalized URI :" + normalizedURI);
-                } catch (URISyntaxException | MalformedURLException e) {
-                    // uncomment these lines to see the exception happen
-//                    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-//                    throw new RuntimeException(e);
-                }
+                } catch (URISyntaxException | MalformedURLException e) {}
 
                 if(normalizedURI != null) {
                     String norm_url = normalizedURI.toString();
@@ -91,23 +85,7 @@ public class Crawler implements Runnable{
                     if (!memory.map_contains(norm_url)) {
                         memory.map_add(norm_url);
                         memory.queue_offer(norm_url,url.getfirst());
-//                    System.out.println("ADDED TO QUEUE: "+ normalizedURI);
                     }
-//                    else if(memory.visited_contains(norm_url)) {
-//                        try{
-//                            Document d = Jsoup.connect(norm_url).get();
-//                            String content = d.outerHtml();
-//                            String Hashed = calculateHash(content);
-//                            if(!Hashed.equals(memory.visited_get(norm_url))){
-//                                memory.visited_add(url,Hashed);
-//                                memory.updated_urls_add(norm_url);
-//                            }
-//                        }
-//                        catch (IOException e){
-//                            e.printStackTrace();
-//                        }
-//                    }
-                    //}
                 }
             }
         }
@@ -119,9 +97,7 @@ public class Crawler implements Runnable{
             Document doc = con.get();
             if(con.response().statusCode() == 200)
             {
-//                String content = doc.outerHtml();
-//                String Hashed = calculateHash(content);
-                mongo.insert_crawler(url.getfirst(),(String) doc.outerHtml());
+                //mongo.insert_crawler(url.getfirst(),(String) doc.outerHtml());
                 memory.Graph_add(url.getfirst(),url.getsecond());
                 memory.visited_add(url.getfirst());
                 memory.map_add(url.getfirst());

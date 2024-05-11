@@ -1,3 +1,5 @@
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +14,6 @@ public class SharedMemory {
     private ConcurrentLinkedQueue<Pair<String,String>> queue;
     private ConcurrentHashMap<String, Boolean> map;
     private HashMap<String, HashSet<String>> Graph;
-//    private ConcurrentHashMap<String, String> visited;
     private ConcurrentHashMap<String, Boolean> visited;
     private boolean queueReachMaxSize;
 
@@ -90,19 +91,16 @@ public class SharedMemory {
         return Graph.size();
     }
 
+    public void set_Graph(HashMap<String, HashSet<String>> newgraph){
+        Graph = newgraph;
+    }
+
     public HashMap<String, HashSet<String>> get_Graph() {return Graph;}
 
-//    public boolean updated_urls_contains(String element) {
-//        return updated_urls.containsKey(element);
-//    }
-//
-//    public boolean updated_urls_remove(String element) {
-//        return updated_urls.remove(element) != null;
-//    }
 
-    public void saveState(String filePath){
+    public void saveState(){
         try {
-            FileWriter fileWriter = new FileWriter(filePath);
+            FileWriter fileWriter = new FileWriter("Start_Urls.txt");
             fileWriter.close();
             System.out.println("File cleared successfully.");
         } catch (IOException e) {
@@ -110,7 +108,7 @@ public class SharedMemory {
             e.printStackTrace();
         }
         try {
-            FileWriter fileWriter = new FileWriter(filePath);
+            FileWriter fileWriter = new FileWriter("Start_Urls.txt");
             while (!queue.isEmpty()) {
                 Pair<String,String> element = queue.poll();
                 fileWriter.write( element.getfirst()+ " "+ element.getsecond() + "\n");
@@ -139,6 +137,11 @@ public class SharedMemory {
             System.out.println("Queue contents saved to file successfully.");
         } catch (IOException e) {
             System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("graph.ser"))) {
+            oos.writeObject(Graph);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
