@@ -16,7 +16,7 @@ public class mongo {
     static {
         mongoClient = MongoClients.create("mongodb+srv://admin:68071299@cluster0.vvgixko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
         database = mongoClient.getDatabase("SearchEngine");
-        collection = database.getCollection("CrawlerPages");
+        collection = database.getCollection("khater");
         collection_Pagerank = database.getCollection("Pagerank");
     }
 

@@ -15,8 +15,8 @@ import java.util.HashSet;
 public class Main {
 
     public static void main(String[] args) {
-        int number_threads = 7;
-        int maxsize = 1000;
+        int number_threads = 5;
+        int maxsize = 3;
         ArrayList<Pair<String,String>>Start_urls = new ArrayList<Pair<String,String>>();
         ArrayList<String>visited_urls = new ArrayList<String>();
         SharedMemory memory = new SharedMemory();
@@ -65,25 +65,21 @@ public class Main {
         System.out.println("Graph size : " + memory.Graph_size());
         System.out.println("# Visited URLs = "+ memory.visited_size());
         System.out.println("Time taken = " + c.get_time());
-        //System.out.println(memory.get_Graph());
+//        System.out.println(memory.get_Graph());
 //        for (HashMap.Entry<String, HashSet<String>> entry : memory.get_Graph().entrySet()) {
 //            String key = entry.getKey();
 //            int setSize = entry.getValue().size();
 //            System.out.println(key + " " + setSize);
 //        }
 
-        //System.out.println(memory.Graph_size());
 
-//        ArrayList<String>arr = mongo.getdocelements("doc1") ;
-//        for(String str : arr){
-//            System.out.println(str);
-//        }
+
         //test rankpage algo
-        System.out.println("pagerank algorithm here");
-        Ranker rank = new Ranker(0,memory.get_Graph());
-        rank.calcPageRank();
-        while(!rank.get_isPageRankDone()){}
-        System.out.println("time taken to calculate pagerank : " + rank.time_taken);
+//        System.out.println("pagerank algorithm here");
+//        Ranker rank = new Ranker(0,memory.get_Graph());
+//        rank.calcPageRank();
+//        while(!rank.get_isPageRankDone()){}
+//        System.out.println("time taken to calculate pagerank : " + rank.time_taken);
     }
 }
 
