@@ -8,12 +8,13 @@ import { useState } from "react";
 function App() {
 
   const [urls,seturls] = useState([]);
+  const [time,settime] = useState();
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route exact path="/" element={<HomePage seturls={seturls} />} />
-        <Route exact path="/urlpage" element={<Urlpage urls={urls} />} />
+        <Route exact path="/" element={<HomePage seturls={seturls} settime={settime} />} />
+        <Route exact path="/urlpage" element={<Urlpage urls={urls} time={time} />} />
       </Routes>
       <Footer />
     </BrowserRouter>

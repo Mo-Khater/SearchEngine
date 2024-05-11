@@ -1,15 +1,30 @@
 
+.urlpage_main {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #181818;
+}
 
-.urlpage{
+.timetaken {
+    position: fixed;
+    right: 200px;
+    top: 100px;
+    min-width: 200px;
+    height: 50px;
+    color: bisque;
+    font-size: 25px;
+}
+
+.urlpage {
     display: flex;
     flex-direction: column;
-    height: 100vh;
     width: 100%;
-    background-color: #181818 ;
 }
 
 
-.urlpage .searchbar{
+.urlpage .searchbar {
     background-color: aliceblue;
     border-radius: 20px;
     width: 25%;
@@ -26,13 +41,13 @@
     }
 }
 
-.urlpage .urls{
+.urlpage .urls {
     display: flex;
     flex-direction: column;
     margin: 20px 100px;
 }
 
-.urlpage .urls .element{
+.urlpage .urls .element {
     width: 40%;
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 10px;
@@ -40,26 +55,20 @@
     margin-bottom: 20px;
 }
 
-.urlpage .urls .element .name{
-    display: block;
-    color: #1a1a1a;
-    text-decoration: none;
-    font-size: 24px;
-}
 
-.urlpage .urls .element .url{
+.urlpage .urls .element .url {
     color: blue;
     text-decoration: none;
     margin-left: 5px;
 }
 
-.urlpage .urls .element .describtion{
+.urlpage .urls .element .describtion {
     margin-top: 10px;
     color: #1a1a1a;
     margin-left: 5px;
 }
 
-.urlpage .urls .element .describtion span{
+.urlpage .urls .element .describtion span {
     display: block;
     color: rgba(8, 8, 8, 0.636);
 }
