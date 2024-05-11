@@ -1,7 +1,5 @@
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.MongoException;
+import com.mongodb.client.*;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -12,12 +10,18 @@ public class mongo {
     private static MongoDatabase database;
     private static MongoCollection<Document> collection;
     private static MongoCollection<Document> collection_Pagerank;
+    private static MongoCollection<Document> TF_IDF_test_collection;
+    private static MongoCollection<Document> docs_collection;
+    private static MongoCollection<Document> words_collection;
 
     static {
         mongoClient = MongoClients.create("mongodb+srv://admin:68071299@cluster0.vvgixko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
         database = mongoClient.getDatabase("SearchEngine");
         collection = database.getCollection("khater");
         collection_Pagerank = database.getCollection("Pagerank");
+        TF_IDF_test_collection = database.getCollection("TF_IDF_Test");
+        docs_collection = database.getCollection("docs");
+        words_collection = database.getCollection("words");
     }
 
     public static void insert_pagerank(HashMap<String,Double> pageRanks){
@@ -36,6 +40,41 @@ public class mongo {
 
     public static void insert_crawler(String url, String doc) {
         collection.insertOne(new Document("url",url).append("doc",doc).append("dummy",1));
+    }
+
+    // a function to get hashmap of <url : pagerank>
+    public static HashMap<String, Double> getPageRanks() throws MongoException {
+        HashMap<String, Double> dataMap = new HashMap<>();
+
+        // Find all documents in the collection
+        FindIterable<Document> documents = collection_Pagerank.find();
+
+        // Iterate through each document and extract key-value pairs
+        for (Document document : documents) {
+            dataMap.put(document.getString("url"), document.getDouble("pagerank"));
+        }
+
+        return dataMap;
+    }
+
+    // a function to get hashmap of <url : numWords>
+    public static HashMap<String, Integer> getNumWords() throws MongoException {
+        HashMap<String, Integer> dataMap = new HashMap<>();
+        FindIterable<Document> documents = docs_collection.find();
+
+        for (Document document : documents) {
+            dataMap.put(document.getString("url"), document.getInteger("numWords"));
+        }
+
+        return dataMap;
+    }
+
+    public static long getNumOfDocs() throws MongoException {
+        return docs_collection.countDocuments();
+    }
+
+    public static MongoCollection<Document> getWordsCollection() throws MongoException {
+        return words_collection;
     }
 
 }
