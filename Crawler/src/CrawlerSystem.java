@@ -1,6 +1,6 @@
 import java.util.ArrayList;
-
-
+import java.util.HashMap;
+import java.util.HashSet;
 
 
 public class CrawlerSystem {
@@ -8,18 +8,18 @@ public class CrawlerSystem {
     private SharedMemory memory;
     ArrayList<Pair<String,String>> Start_urls;
     ArrayList<String> visited_urls;
+    HashMap<String, HashSet<String>> newGraph;
     ArrayList<Thread> threads=new ArrayList<>();
     private long time_taken;
-    private final String filepath;
     private int maxsize;
 
-    CrawlerSystem(int s, SharedMemory s_m, ArrayList<Pair<String,String>> s_u,ArrayList<String> v,String fp,int max) {
+    CrawlerSystem(int s, SharedMemory s_m, ArrayList<Pair<String,String>> s_u, ArrayList<String> v, HashMap<String, HashSet<String>> Graph , int max) {
         number_threads = s;
         memory = s_m;
         Start_urls = s_u;
-        filepath=fp;
         maxsize = max;
         visited_urls = v;
+        newGraph = Graph;
     }
 
     public void Start() {
@@ -31,10 +31,13 @@ public class CrawlerSystem {
 
         for(String s : visited_urls) {
             memory.visited_add(s);
+            memory.map_add(s);
         }
 
+        if(newGraph!=null)memory.set_Graph(newGraph);
+
 //        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-//            memory.saveState(filepath);
+//            memory.saveState();
 //            System.out.println("State Saved Successfully");
 //            Runtime.getRuntime().halt(0);
 //        }));
