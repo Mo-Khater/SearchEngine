@@ -2,9 +2,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.mongodb.client.*;
+import com.mongodb.client.model.Filters;
 import org.bson.Document;
 
 import javax.lang.model.type.NullType;
+import javax.print.Doc;
 import java.util.ArrayList;
 import java.lang.Math;
 
@@ -21,11 +23,12 @@ public class Ranker {
 
     // test TF-IDF only
     public static void main(String[] args) {
-        HashMap<String, Double> pageRanks = mongo.getPageRanks();
-        HashMap<String, Integer> numWords = mongo.getNumWords();
-        System.out.println(pageRanks.get("https://be.wikipedia.org/"));
-        System.out.println(numWords.get("https://be.wikipedia.org/"));
-        appendFinalScoreForAll();
+//        HashMap<String, Double> pageRanks = mongo.getPageRanks();
+//        HashMap<String, Integer> numWords = mongo.getNumWords();
+//        System.out.println(pageRanks.get("https://be.wikipedia.org/"));
+//        System.out.println(numWords.get("https://be.wikipedia.org/"));
+//        appendFinalScoreForAll();
+        OptimizeGPT();
     }
 
     public Ranker(double e,HashMap<String, HashSet<String>> g){
@@ -163,7 +166,6 @@ public class Ranker {
         // Normalized TF = term count / number of words in doc
         // IDF = log (#docs in db / DF)
         // TF_IDF = nTF * IDF
-//        Document filter = new Document("wordID", token);
 
         // Find all documents (empty filter)
         FindIterable<Document> collection_documents = collection.find();
@@ -172,7 +174,7 @@ public class Ranker {
         MongoCursor<Document> cursor = collection_documents.iterator();
         while (cursor.hasNext()) {
             Document document = cursor.next();
-            Document filter = new Document("wordID", document.get("wordID"));
+            String wordId = document.getString("wordID");
             System.out.println("Appending Final score for the token '" + document.get("wordID") + "'");
             ArrayList<Document> documents = (ArrayList<Document>) document.get("documents");
             long DF = documents.size();
@@ -180,13 +182,18 @@ public class Ranker {
             int i = 0;
             for (Document d : documents) {
                 int tf = d.getInteger("tf");
-                String currURL = d.getString("url");
-                if (docs_numWords.get(currURL) == null) {
+                // identify webpages by objectid
+                String currObjectId_str = d.getString("objectid");
+                if (docs_numWords.get(currObjectId_str) == null) {
                     continue;
                 }
-                int numWords = docs_numWords.get(currURL);
+                int numWords = docs_numWords.get(currObjectId_str);
                 double normTF = (double) tf / numWords;
                 double TFIDF = IDF * normTF;
+
+                ArrayList<String> metadata  = (ArrayList<String>) d.get("metadata");
+                if (metadata.contains("title"))
+                    TFIDF *= 1.5;
 
                 // get pageRank of this URL
                 double pgrnk = -1;
@@ -199,17 +206,145 @@ public class Ranker {
                 double final_score = TFIDF * pgrnk * 10000;
 
                 d.append("final_score", final_score);
-                Document update = new Document();
-                update.append("$set", new Document("documents." + i, d));
-                collection.updateOne(filter, update);
                 System.out.println(d.get("url") +"\t" + final_score);
                 i++;
             }
-
+            // uncomment this when you want the update to happen
+//            collection.updateOne(Filters.eq("wordID", wordId), new Document("$set", new Document("documents", documents)));
         }
 
-        // Always close the cursor to release resources
         cursor.close();
     }
 
+    public static void testOptimization() {
+        MongoClient mongoClient = MongoClients.create("mongodb+srv://admin:68071299@cluster0.vvgixko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
+        MongoDatabase database = mongoClient.getDatabase("SearchEngine");
+        MongoCollection<Document> collection = database.getCollection("optimization_test");
+
+        FindIterable<Document> collection_documents = collection.find();
+
+        // Use a cursor to iterate through documents
+        MongoCursor<Document> cursor = collection_documents.iterator();
+
+        // outer scope : each document of collection
+        while (cursor.hasNext()) {
+            Document document = cursor.next();
+            Document filter = new Document("word_id", document.get("word_id"));
+            ArrayList<Document> documents = (ArrayList<Document>) document.get("documents");
+            Document update = new Document();
+
+            // loop on documents of each document
+            int i = 0;
+            for (Document d : documents) {
+                int tf = d.getInteger("tf");
+                double score = tf;
+
+                ArrayList<String> metadata  = (ArrayList<String>) d.get("metadata");
+                if (metadata.contains("title"))
+                    score = score * 1.5;
+
+                d.append("score", score);
+                update.append("$set", new Document("documents." + i, d));
+                i++;
+            }
+            collection.updateOne(filter, update);
+            System.out.println(document.get("word_id") +"\t" + document.get("score"));
+        }
+        cursor.close();
+    }
+
+
+    public static void OptimizeGPT() {
+        try (MongoClient mongoClient = MongoClients.create("mongodb+srv://admin:68071299@cluster0.vvgixko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")) {
+            MongoDatabase database = mongoClient.getDatabase("SearchEngine");
+            MongoCollection<Document> collection = database.getCollection("optimization_test");
+
+            MongoCursor<Document> cursor = collection.find().iterator();
+
+            while (cursor.hasNext()) {
+                Document document = cursor.next();
+                String wordId = document.getString("word_id");
+                ArrayList<Document> documents = (ArrayList<Document>) document.get("documents");
+
+                for (Document d : documents) {
+                    int tf = d.getInteger("tf");
+                    double score = tf;
+
+                    ArrayList<String> metadata = (ArrayList<String>) d.get("metadata");
+                    if (metadata.contains("title"))
+                        score *= 1.5;
+
+                    d.append("score", score);
+                }
+
+                collection.updateOne(Filters.eq("word_id", wordId), new Document("$set", new Document("documents", documents)));
+
+                // Now you can print score for each document
+//                System.out.println(wordId + "\t" + document.get("score"));
+            }
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static void calculateFinalScore() {
+
+        MongoCollection<Document> collection = mongo.getWordsCollection();
+
+        // get page ranks (from pagerank collection) to append the final score directly
+        HashMap<String, Double> docs_pageRanks = mongo.getPageRanks();
+
+        // get numWords (from docs collection)
+//        HashMap<String, Integer> docs_numWords = mongo.getNumWords();
+        long countAll = mongo.getNumOfDocs();
+        // Normalized TF = term count / number of words in doc
+        // IDF = log (#docs in db / DF)
+        // TF_IDF = nTF * IDF
+
+        // Find all documents (empty filter)
+        FindIterable<Document> collection_documents = collection.find();
+
+        // Use a cursor to iterate through documents
+        MongoCursor<Document> cursor = collection_documents.iterator();
+        while (cursor.hasNext()) {
+            Document document = cursor.next();
+            String wordId = document.getString("wordID");
+            System.out.println("Appending Final score for the token '" + document.get("wordID") + "'");
+            ArrayList<Document> documents = (ArrayList<Document>) document.get("documents");
+            long DF = documents.size();
+            double IDF = Math.log((double) countAll / DF);
+            int i = 0;
+            for (Document d : documents) {
+                int tf = d.getInteger("tf");
+                // identify webpages by objectid
+                String currObjectId_str = d.getString("objectid");
+
+                int numWords = mongo.getNumWordsOf(currObjectId_str);
+
+                double normTF = (double) tf / numWords;
+                double TFIDF = IDF * normTF;
+
+                ArrayList<String> metadata  = (ArrayList<String>) d.get("metadata");
+                if (metadata.contains("title"))
+                    TFIDF *= 1.5;
+
+                // get pageRank of this URL
+                double pgrnk = -1;
+                pgrnk = docs_pageRanks.get(d.get("url"));
+                if (pgrnk == -1) {
+                    System.out.println("URL NOT FOUND IN MAP");
+                    return;
+                }
+
+                double final_score = TFIDF * pgrnk * 10000;
+
+                d.append("final_score", final_score);
+                System.out.println(d.get("url") +"\t" + final_score);
+                i++;
+            }
+            collection.updateOne(Filters.eq("wordID", wordId), new Document("$set", new Document("documents", documents)));
+        }
+
+        cursor.close();
+    }
 }

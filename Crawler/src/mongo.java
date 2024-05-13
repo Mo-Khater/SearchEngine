@@ -1,6 +1,7 @@
 import com.mongodb.MongoException;
 import com.mongodb.client.*;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,12 +62,21 @@ public class mongo {
     public static HashMap<String, Integer> getNumWords() throws MongoException {
         HashMap<String, Integer> dataMap = new HashMap<>();
         FindIterable<Document> documents = docs_collection.find();
-
         for (Document document : documents) {
-            dataMap.put(document.getString("url"), document.getInteger("numWords"));
+            String objectId_str = document.getObjectId("_id").toString();
+            dataMap.put(objectId_str, document.getInteger("numWords"));
         }
-
         return dataMap;
+    }
+
+    public static int getNumWordsOf(String objectId_str) throws MongoException {
+        ObjectId objectId = new ObjectId(objectId_str);
+        return docs_collection.find(new Document("_id", objectId)).first().getInteger("numWords");
+    }
+
+    public static Document quickTest(String objectId_str) throws MongoException {
+        ObjectId objectId = new ObjectId(objectId_str);
+        return docs_collection.find(new Document("objectid", objectId)).first();
     }
 
     public static long getNumOfDocs() throws MongoException {
