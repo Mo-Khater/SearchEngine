@@ -7,6 +7,32 @@
     background-color: #181818;
 }
 
+.next10 {
+    position: fixed;
+    top:50%;
+    left: 710px;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 15px solid #979595;
+    border-right: 0;
+    background-color: transparent;
+}
+
+.prev10 {
+    position: fixed;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 15px solid #979595;
+    border-left: 0;
+    top:50%;
+    left: 30px;
+    background-color: transparent;
+}
+
 .timetaken {
     position: fixed;
     right: 200px;
@@ -71,4 +97,48 @@
 .urlpage .urls .element .describtion span {
     display: block;
     color: rgba(8, 8, 8, 0.636);
+}
+
+
+.urlpage_main .loading {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    border: 5px solid #526D82;
+    border-right-color: transparent;
+    left: 38%;
+    top: 7%;
+    transform: translate(-50%,-50%);
+    border-radius: 50%;
+    animation-name: load;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    animation-direction: normal;
+}
+
+.urlpage_main .loading::before {
+    content: '';
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    border: 5px solid #9DB2BF;
+    border-left-color: transparent;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    border-radius: 50%;
+}
+
+.urlpage_main .loading::after {
+    content: '';
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    border: 5px solid #526D82;
+    border-top-color: transparent;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    border-radius: 50%;
 }
